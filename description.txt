@@ -542,6 +542,36 @@ The core includes:
 Do not cut core cards for niche techs, cute synergies, or low-impact one-ofs unless those cards clearly improve match performance or consistency.
 
 ============================================================
+SKELETON FLOOR RULE
+============================================================
+
+Unless actual card text clearly justifies otherwise, start from these baseline targets for a normal 60-card build:
+- 7-10 Basics
+- 12-18 total Pokémon
+- 28-36 Trainers
+- 10-14 Energy
+- 12+ setup outs
+- 2-4 pivot outs
+
+These are baseline floors and ranges, not hard deckbuilding laws.
+A major deviation is allowed only if the card pool or the deck's actual strategy clearly justifies it.
+
+If the final deck falls well outside these targets, briefly justify why that is still correct for this pool and strategy.
+
+============================================================
+DEAD-CARD CAP RULE
+============================================================
+
+Do not finalize a deck with too many dead-early, filler-risk, or highly situational cards unless the pool is too weak to avoid it.
+
+Guidelines:
+- Prefer no more than 6 total cards tagged as dead early, filler risk, or highly situational.
+- Prefer no more than 2 narrow one-of Trainers unless each one solves a specific, named weakness in the deck.
+- Strongly penalize lists where too many opening hands can contain multiple cards that do little or nothing without already being ahead or already being set up.
+
+If the pool forces a deck above these limits, say so clearly and simplify the list as much as possible.
+
+============================================================
 RESOURCE SUSTAINABILITY RULES
 ============================================================
 
@@ -564,6 +594,41 @@ You must explicitly evaluate:
 - If yes, penalize that build unless the payoff is clearly worth it.
 
 A deck that opens well but runs out of steam too quickly is not considered a strong final build.
+
+============================================================
+CANDIDATE DECK COMPARISON RULE
+============================================================
+
+Before finalizing, generate 2-4 realistic candidate decks that all satisfy the user's request.
+
+Each candidate must represent a meaningfully different shell, such as:
+- safest / smoothest build
+- strongest aggressive build
+- slower bridged build
+- greedier higher-payoff build
+
+A candidate only counts as distinct if it changes the deck's real structure, such as:
+- different main attacker line
+- different bridge plan
+- different Energy system
+- different setup engine
+- different speed / curve profile
+
+Do NOT create fake variants with only 1-2 trivial card changes.
+
+Evaluate each candidate for:
+- legality
+- opening stability
+- setup consistency
+- early-game function
+- bridge quality
+- payoff timing
+- Energy sustainability
+- backup plan quality
+- dead-card risk
+- average-draw usability
+
+Return only the single best final deck unless I explicitly ask to see all candidates.
 
 ============================================================
 SHELL COMPARISON RULE
@@ -746,6 +811,30 @@ Suggested approach:
 Do not pretend one build is clearly superior if the small-sample test does not support that conclusion.
 
 ============================================================
+FORCED FALLBACK REBUILD PROTOCOL
+============================================================
+
+After building and testing a candidate shell, you MUST reject that shell and simplify it if any of the following are true:
+- Raw no-Basic rate > 12%
+- Functional opener rate < 70%
+- Dead / awkward opener rate > 20%
+- Early Energy access by the target turn < 80%
+- Main plan OR believable bridge plan online by the target turn < 70%
+- The deck frequently has hollow early turns with no meaningful search, draw, benching, pivoting, evolving, Energy progress, or bridge pressure
+
+If a shell fails, simplify in this order:
+a. Cut a third Energy type, then cut the second type if possible
+b. Cut Stage 2 lines before Stage 1 lines unless the Stage 2 is clearly the only strong payoff
+c. Cut narrow one-of Trainers
+d. Increase real starting Basics
+e. Increase search, draw, and pivot cards
+f. Lower the curve and favor lower-cost attackers or real bridge attackers
+
+Repeat until the list passes or until the pool clearly cannot support a better result.
+
+If the tested deck fails these minimum opener / Energy / bridge thresholds, you must simplify the shell and rebuild rather than defend the original concept.
+
+============================================================
 CONSISTENCY TEST (MUST DO BEFORE FINALIZING)
 ============================================================
 
@@ -869,7 +958,8 @@ A) Parse + normalize the pool
 
 B) Build candidate shells
 - Identify the most likely competitive directions in the pool.
-- Internally compare at least 2 candidate shells if more than one reasonable build exists.
+- Build 2-4 realistic candidate decks if more than one reasonable build exists.
+- Each candidate must be meaningfully distinct in structure, not just trivial card swaps.
 - Prefer:
   - strongest stable shell
   - strongest properly bridged shell
@@ -885,8 +975,10 @@ C) Choose the final 60 cards
 - Enforce all card-count, availability, ACE SPEC, and text restrictions.
 
 D) Run reliability testing
-- If code is available, run the mandatory 50-trial reliability test on the final candidate, and compare with another candidate if the choice is close.
+- If code is available, run the mandatory 50-trial reliability test on the leading candidate.
+- If the choice is close, also test the next-best candidate and compare them honestly.
 - Revise if the test reveals too many dead starts, weak average draws, or a fake bridge plan.
+- If the tested deck fails the fallback thresholds, simplify and rebuild.
 
 E) Final self-check
 - Verify exactly 60 cards.
