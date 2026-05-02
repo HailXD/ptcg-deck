@@ -1,7 +1,7 @@
 INPUT FORMAT:
 Card pool lines use:
 
-`{count} {Card Name} {setCode}-{cardNumber}#{fields}`
+`{count} {Card Name} {setCode}-{cardNumber}#{canonicalName}|{fields}`
 
 Parse rule:
 
@@ -9,10 +9,118 @@ Parse rule:
 * `{Card Name}` is the printed/display name used for deck export.
 * `{setCode}-{cardNumber}` is the exact print identifier.
 * `{canonicalName}` is the card name used for legality and same-name copy limits.
-* `{fields}` contains the compact card data.
+* `{fields}` contains compact card data used for deckbuilding decisions.
 * Card legality and the 4-copy limit are based on `{canonicalName}`.
 * Exact ownership availability is based on `{setCode}-{cardNumber}`.
 * Final deck export must use `{Card Name}` and `{setCode}-{cardNumber}`.
+
+FIELD FORMAT:
+Fields appear after the first `|`.
+
+Top-level field syntax:
+
+* Top-level fields are separated by `|`.
+* Key/value pairs use `=`.
+* Lists use `[item,item,item]`.
+* Objects use `{key=value,key=value}`.
+* A field value may be a raw string, list, or object.
+* `\` escapes reserved characters when needed.
+* Reserved characters are: `\ | = , [ ] { }`
+
+FIELD KEYS:
+Use these keys to understand card function:
+
+* `s` = subtypes or classification.
+
+  * For Pokémon, this may contain Basic, Stage 1, Stage 2, ex, MEGA, Tera, etc.
+  * For Trainers, this may contain Item, Supporter, Stadium, Pokémon Tool, etc.
+  * For Energy, this may contain Basic or Special.
+  * If `s` is a single value, treat it as one subtype.
+  * If `s` is a list, treat every listed value as a subtype.
+
+* `h` = HP.
+
+  * Numeric HP value.
+  * Mainly relevant for Pokémon and Fossil-like cards that can be played as Pokémon.
+
+* `t` = type.
+
+  * For Pokémon, this is the Pokémon type or types.
+  * For nested objects, `t` may also mean the object type, such as Ability.
+  * Interpret by context.
+
+* `ef` = evolves from.
+
+  * The lower-stage card this card evolves from.
+  * Use this to build evolution lines and check whether the needed Basic or Stage 1 exists.
+
+* `et` = evolves to.
+
+  * The higher-stage card or cards this card can evolve into.
+  * Use this to identify possible evolution paths.
+  * This is useful but not required for legality if `ef` already defines the line.
+
+* `r` = rules text.
+
+  * Used for Trainer effects, Energy effects, Pokémon rule boxes, restrictions, Fossil rules, Tool rules, Tera Bench protection, copy limits, and other special card text.
+  * Any deckbuilding restriction in `r` must be obeyed.
+
+* `ab` = ability or abilities.
+
+  * May be a single object or a list of objects.
+  * Use abilities to identify setup engines, draw engines, acceleration, protection, switching, disruption, recovery, and passive effects.
+
+* `at` = attack or attacks.
+
+  * May be a single object or a list of objects.
+  * Use attacks to identify starters, bridge attackers, main attackers, backup attackers, Energy costs, damage output, discard costs, status effects, and tempo.
+
+COMMON NESTED KEYS:
+Nested objects inside `ab` and `at` may use:
+
+* `n` = name.
+
+  * Name of the attack, Ability, or nested effect.
+
+* `x` = text.
+
+  * Effect text of the attack, Ability, rule, or nested effect.
+  * This is often the most important field for judging card function.
+
+* `c` = cost.
+
+  * Usually attack cost.
+  * Treat listed Energy symbols as the cost required to use the attack.
+  * `Colorless` can be paid by any Energy.
+  * `Free` means no Energy cost.
+
+* `d` = damage.
+
+  * Printed attack damage.
+  * May include symbols such as `+`, `-`, or `×`.
+  * Use the attack text `x` to understand conditional damage.
+
+* `t` = nested type.
+
+  * Usually identifies the nested object type, such as Ability.
+  * Do not confuse this with top-level Pokémon type.
+
+* `v` = value.
+
+  * Generic nested value field.
+  * Use only when relevant and interpretable from context.
+
+FIELD INTERPRETATION RULES:
+
+* Use actual card text from `r`, `ab`, and `at` over generic assumptions.
+* If a field is missing, do not invent it.
+* If a card has no `ab`, assume it has no listed Ability.
+* If a card has no `at`, assume it has no listed attack.
+* If a value is malformed or incomplete, use only what is clear and judge conservatively.
+* If `at` or `ab` is a list, evaluate every listed attack or Ability.
+* If `at` or `ab` is a single object, treat it as one attack or Ability.
+* Use `ef` and `et` to identify evolution support, but do not include unsupported evolution pieces unless the deck can actually use them.
+* Use `r` to detect ACE SPEC, Special Energy restrictions, Tool behavior, Fossil behavior, Tera protection, “can’t attack” clauses, “can’t use more than 1” clauses, and other deckbuilding constraints.
 
 FINAL DECK FORMAT:
 Every final decklist line must use:
@@ -116,7 +224,7 @@ FINAL OUTPUT TEMPLATE:
 
 ### JY {Deck Name}
 
-```text
+```text id="m9x6yf"
 {count} {Card Name} {setCode}-{cardNumber}
 {count} Basic {EnergyType} Energy {energyCode}
 ```
@@ -153,3 +261,5 @@ Strength: X/10
   * Main log findings:
   * Revisions made from API result:
   * Final average-draw reliability:
+
+Based on the uploaded pool format where cards use compact fields such as `s`, `h`, `t`, `ef`, `et`, `r`, `ab`, and `at`. 
