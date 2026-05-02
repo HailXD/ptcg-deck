@@ -1,7 +1,7 @@
 INPUT FORMAT:
 Card pool lines use:
 
-`{count} {Card Name} {setCode}-{cardNumber}#{canonicalName}|{fields}`
+`{count} {Card Name} {setCode}-{cardNumber}#{fields}`
 
 Parse rule:
 
